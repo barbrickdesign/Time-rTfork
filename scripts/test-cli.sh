@@ -7,9 +7,28 @@
 #
 # =================================================================
 
+# Script to run CLI tests using shunit2
+# Usage: ./scripts/test-cli.sh
+
 set -euo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Function to print error messages
+error() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+# Verify the now binary exists
+if [[ ! -f "${DIR}/../bin/now" ]]; then
+  error "Binary '${DIR}/../bin/now' not found. Run 'make bin/now' to build it."
+fi
+
+# Verify shunit2 exists
+if [[ ! -f "${DIR}/shunit2" ]]; then
+  error "shunit2 not found at ${DIR}/shunit2"
+fi
 
 testEpochSeconds() {
   "${DIR}/../bin/now" -e -p s
@@ -53,11 +72,13 @@ testTimeZoneNamed() {
 
 oneTimeSetUp() {
   echo "Using temporary directory at ${SHUNIT_TMPDIR}"
+  echo "Testing now binary: ${DIR}/../bin/now"
 }
 
 oneTimeTearDown() {
-  echo "Tearing Down"
+  echo "All CLI tests completed"
 }
 
 # Load shUnit2.
+# shellcheck disable=SC1091
 . "${DIR}/shunit2"
